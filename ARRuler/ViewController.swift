@@ -13,6 +13,7 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     var dotNodes: [SCNNode] = []
+    var textNode = SCNNode()
 
     @IBOutlet var sceneView: ARSCNView!
     
@@ -55,17 +56,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                                       z: hitResult.worldTransform.columns.3.z)
         sceneView.scene.rootNode.addChildNode(dotNode)
         dotNodes.append(dotNode)
-        if dotNodes.count >= 2 {
-            calculate()
-        }
+        calculate()
     }
 
     func calculate() {
         if let start = dotNodes.first {
-            print(start.position)
             if let finish = dotNodes.last {
-                print(finish.position)
-                print(distance(from: start.position, to: finish.position))
+                let d = distance(from: start.position, to: finish.position)
+                print(d)
+                updateText(text: "\(d)", at: finish.position)
             }
         }
     }
@@ -75,5 +74,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let b = pow((start.y - finish.y), 2)
         let c = pow((start.z - finish.z), 2)
         return sqrt(a + b + c)
+    }
+
+    func updateText(text: String, at position: SCNVector3) {
+        textNode.removeFromParentNode()
+
+        let textGeom = SCNText(string: text, extrusionDepth: 1.0)
+        textGeom.firstMaterial?.diffuse.contents = UIColor.red
+        textNode = SCNNode(geometry: textGeom)
+        textNode.position = SCNVector3(x: position.x, y: position.y + 0.01, z: position.z)
+        textNode.scale = SCNVector3(x: 0.01, y: 0.01, z: 0.01)
+        sceneView.scene.rootNode.addChildNode(textNode)
     }
 }
